@@ -4,7 +4,7 @@ import com.microsoft.playwright.*;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
-public class launchBrowser {
+public class LaunchBrowser {
     public static void main(String[] args) {
         Playwright playwright = Playwright.create();
         Browser browser = playwright.chromium().launch(
