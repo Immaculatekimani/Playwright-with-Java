@@ -16,14 +16,25 @@ public class TraceViewSetup {
 
         try {
             playwright = Playwright.create();
+
             browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+
             context = browser.newContext();
-            context.tracing().start(new Tracing.StartOptions().setScreenshots(true).setSnapshots(true).setSources(true));
+
+            context.tracing().start(new Tracing.StartOptions()
+                    .setScreenshots(true)
+                    .setSnapshots(true)
+                    .setSources(true)
+            );
             tracingStarted = true;
 
             Page page = context.newPage();
-            page.setDefaultNavigationTimeout(80000); // Increase time of loading in case of slow network
+            page.setDefaultNavigationTimeout(80000); // Set navigation timeout to 80 seconds
+
+            // Navigate to the website
             page.navigate("https://ecommerce-playground.lambdatest.io/");
+
+            // Perform interactions on the page
             assertThat(page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName(" My account"))).isVisible();
             Locator myAccountButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName(" My account"));
             myAccountButton.hover();
@@ -33,26 +44,31 @@ public class TraceViewSetup {
             page.getByPlaceholder("Password").click();
             page.getByPlaceholder("Password").fill("lambdatest");
             page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Login")).click();
-            assertThat(page.locator("#account-login")).containsText("Warning: Your account has exceeded allowed number of login attempts. Please try again in 1 hour.");
 
+            // Assert that the expected warning message is displayed
+            assertThat(page.locator("#account-login")).containsText("Warning: Your account has exceeded allowed number of login attempts. Please try again in 1 hour.");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
                 if (tracingStarted) {
-                    context.tracing().stop(new Tracing.StopOptions().setPath(Paths.get("TestTraces.zip")));
+                    context.tracing().stop(new Tracing.StopOptions()
+                            .setPath(Paths.get("TestTraces.zip"))
+                    );
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-            if (context != null) {
-                context.close();
-            }
-            if (browser != null) {
-                browser.close();
-            }
-            if (playwright != null) {
-                playwright.close();
+            } finally {
+                // Close the context, browser, and playwright
+                if (context != null) {
+                    context.close();
+                }
+                if (browser != null) {
+                    browser.close();
+                }
+                if (playwright != null) {
+                    playwright.close();
+                }
             }
         }
     }
